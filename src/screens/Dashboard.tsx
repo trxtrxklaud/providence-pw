@@ -15,11 +15,12 @@ export default function Dashboard() {
       return;
     }
 
-    if (user?.role === 'parent') {
+    const role = typeof user?.role === 'string' ? user?.role : user?.role?.name;
+    if (role === 'parent') {
       setLoading(true);
       childrenAPI.getChildren()
-        .then((res) => setChildren(res.data?.data || []))
-        .catch((err) => console.error(err))
+        .then((res: any) => setChildren(res.data?.data || []))
+        .catch((err: any) => console.error(err))
         .finally(() => setLoading(false));
     }
   }, [token, user, navigate]);
@@ -29,16 +30,19 @@ export default function Dashboard() {
     navigate('/login');
   };
 
+  const displayName = user?.first_name || (user as any)?.name || 'مستخدم';
+  const roleName = typeof user?.role === 'string' ? user?.role : user?.role?.name || 'مستخدم';
+
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
       {/* Top Navbar */}
-      <header className="bg-white shadow-sm border-b border-gray-100">
+      <header className="bg-white shadow-xs border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🏫</span>
             <div>
               <h1 className="text-xl font-bold text-orange-600">Providence PWA</h1>
-              <p className="text-xs text-gray-400">مرحباً بك، {user?.first_name || user?.name || 'مستخدم'}</p>
+              <p className="text-xs text-gray-400">مرحباً بك، {displayName}</p>
             </div>
           </div>
           <button
@@ -52,11 +56,13 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <div className="bg-white p-6 rounded-2xl shadow-xs border border-gray-100 mb-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-gray-800">بيانات الحساب</h2>
-              <p className="text-sm text-gray-500">الدور الحالي: <span className="font-semibold text-orange-600">{user?.role || 'مستخدم'}</span></p>
+              <p className="text-sm text-gray-500">الدور الحالي: <span className="font-semibold text-orange-600">
+                {roleName}
+              </span></p>
               {user?.phone && <p className="text-sm text-gray-500">رقم الهاتف: {user.phone}</p>}
             </div>
             <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
@@ -65,8 +71,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {user?.role === 'parent' && (
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        {roleName === 'parent' && (
+          <div className="bg-white p-6 rounded-2xl shadow-xs border border-gray-100">
             <h2 className="text-lg font-bold text-gray-800 mb-4">قائمة الأبناء</h2>
             {loading ? (
               <p className="text-gray-400 text-sm">جاري تحميل البيانات...</p>
